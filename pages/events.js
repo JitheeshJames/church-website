@@ -1,5 +1,12 @@
-export default function Events() {
+import Header from "../components/Header";
+
+export default function Home() {
   return (
+    <>
+      {/* Header with logo and navigation */}
+      <Header />
+
+      {/* Main content */}
     <div style={{ padding: 20, fontFamily: 'sans-serif', lineHeight: 1.6 }}>
       <h1>📅 Upcoming Events</h1>
       <p>Stay updated with our church events and gatherings.</p>
