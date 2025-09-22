@@ -1,23 +1,27 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
 import { useRouter } from "next/router";
+import { supabase } from "../lib/supabase";
 
 export default function ProtectedRoute({ children }) {
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
+  const [authenticated, setAuthenticated] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
-        router.push("/admin/login");
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.replace("/login");
       } else {
-        setUser(user);
-        setLoading(false);
+        setAuthenticated(true);
       }
-    });
-  }, []);
+      setLoading(false);
+    };
+    checkAuth();
+  }, [router]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p style={{ textAlign: 'center', padding: 50 }}>Loading...</p>;
+  if (!authenticated) return null;
+
   return <>{children}</>;
 }
