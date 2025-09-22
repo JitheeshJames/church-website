@@ -1,47 +1,155 @@
-import { useState } from "react";
 import Header from "../components/Header";
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 
 export default function Prayer() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
   const [prayers, setPrayers] = useState([]);
-  const [newPrayer, setNewPrayer] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
-  const addPrayer = () => {
-    if (newPrayer.trim() !== "") {
-      setPrayers([...prayers, newPrayer]);
-      setNewPrayer("");
+  useEffect(() => {
+    fetchPrayers();
+  }, []);
+
+  const fetchPrayers = async () => {
+    const { data } = await supabase
+      .from("prayer_requests")
+      .select("*")
+      .order("date", { ascending: false });
+    setPrayers(data || []);
+  };
+
+  const submitPrayer = async () => {
+    if (!name || !email || !phone || !message) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    const { error } = await supabase.from("prayer_requests").insert([
+      {
+        requester_name: name,
+        email,
+        phone,
+        message,
+      },
+    ]);
+
+    if (error) {
+      console.error(error);
+      alert("Failed to submit prayer request");
+    } else {
+      setSuccessMsg("Prayer request submitted successfully!");
+      setName("");
+      setEmail("");
+      setPhone("");
+      setMessage("");
+      fetchPrayers();
     }
   };
 
   return (
     <>
-      {/* Header with logo and navigation */}
       <Header />
+      <main
+        style={{
+          padding: 20,
+          fontFamily: "Arial, sans-serif",
+          maxWidth: 700,
+          margin: "0 auto",
+        }}
+      >
+        <h1 style={{ color: "#2c6e49", textAlign: "center" }}>
+          Prayer Requests
+        </h1>
 
-      {/* Page content */}
-      <div style={{ padding: 20, fontFamily: 'sans-serif', lineHeight: 1.6 }}>
-        <h1>🙏 Prayer Requests</h1>
-        <p>Submit your prayer request below. Others can also view and pray for you.</p>
+        {successMsg && (
+          <p
+            style={{
+              color: "#0070f3",
+              backgroundColor: "#e0f7ff",
+              padding: 10,
+              borderRadius: 8,
+              textAlign: "center",
+            }}
+          >
+            {successMsg}
+          </p>
+        )}
 
-        {/* Input form */}
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
           <input
             type="text"
-            placeholder="Enter your prayer request"
-            value={newPrayer}
-            onChange={(e) => setNewPrayer(e.target.value)}
-            style={{ padding: 8, width: "70%", marginRight: 10 }}
+            placeholder="Your Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={inputStyle}
           />
-          <button onClick={addPrayer} style={{ padding: "8px 15px" }}>Add</button>
+          <input
+            type="email"
+            placeholder="Your Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={inputStyle}
+          />
+          <input
+            type="tel"
+            placeholder="Your Phone Number"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            style={inputStyle}
+          />
+          <textarea
+            placeholder="Write your prayer..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            style={{ ...inputStyle, minHeight: 100 }}
+          />
+          <button onClick={submitPrayer} style={buttonStyle}>
+            Submit Prayer
+          </button>
         </div>
 
-        {/* Display prayer requests */}
-        <h2>🕊️ Requests List</h2>
-        <ul>
-          {prayers.map((p, index) => (
-            <li key={index}>{p}</li>
-          ))}
-        </ul>
-      </div>
+        <section style={{ marginTop: 40 }}>
+          <h2>Recent Prayer Requests</h2>
+          <ul style={{ padding: 0, listStyle: "none" }}>
+            {prayers.map((p) => (
+              <li
+                key={p.id}
+                style={{
+                  padding: 10,
+                  borderBottom: "1px solid #eee",
+                  marginBottom: 5,
+                }}
+              >
+                <p><strong>{p.requester_name}</strong> ({p.email}, {p.phone})</p>
+                <p>{p.message}</p>
+                <small>{new Date(p.date).toLocaleString()}</small>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </main>
     </>
   );
 }
+
+const inputStyle = {
+  padding: 12,
+  borderRadius: 8,
+  border: "1px solid #ccc",
+  width: "100%",
+  boxSizing: "border-box",
+};
+
+const buttonStyle = {
+  padding: 12,
+  borderRadius: 8,
+  border: "none",
+  backgroundColor: "#0070f3",
+  color: "white",
+  fontWeight: "bold",
+  cursor: "pointer",
+};
