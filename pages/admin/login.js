@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../../lib/supabase";
+import { useRouter } from "next/router";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithOtp({ email });
@@ -13,7 +15,7 @@ export default function Login() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Login</h1>
+      <h1>Admin Login</h1>
       <input
         type="email"
         placeholder="Your email"
