@@ -87,7 +87,7 @@ export default function Home() {
             { name: "📅 Events", link: "/events" },
             { name: "💝 Give", link: "/give" },
             { name: "📊 Departments", link: "/admin/departments" },
-            { name: "👤 Login", link: "/login" },
+            { name: "👤 Login", link: "/admin/login" },
           ].map((item, index) => (
             <motion.div
               key={item.name}
