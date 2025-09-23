@@ -1,5 +1,5 @@
-import Header from "../../components/Header";
 "use client";
+import Header from "../../components/Header";
 import { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
