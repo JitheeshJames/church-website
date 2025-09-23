@@ -1,95 +1,71 @@
 import Header from "../../components/Header";
+"use client";
 import { useState } from "react";
-import { supabase } from "../../lib/supabase";
-import { useRouter } from "next/router";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-export default function Login() {
+export default function LoginPage() {
+  const supabase = createClientComponentClient();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const router = useRouter();
 
-  const handleLogin = async () => {
-    if (!email) {
-      alert("Please enter your email");
-      return;
-    }
-
-    const { data, error } = await supabase.auth.signInWithOtp({
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/admin`, // Redirect after login
+        emailRedirectTo: "https://your-app.vercel.app/admin/dashboard", // prod
       },
     });
-
     if (error) {
-      console.error(error);
-      alert("Failed to send login link");
+      setMessage("❌ Error sending magic link.");
     } else {
-      setMessage(
-        `Check your email (${email}) for the login link! It may take a few seconds.`
-      );
+      setMessage("✅ Magic link sent! Check your email.");
     }
   };
 
   return (
-    <>
-      <Header />
-      <main
-        style={{
-          padding: 20,
-          fontFamily: "Arial, sans-serif",
-          maxWidth: 500,
-          margin: "0 auto",
-        }}
-      >
-        <h1 style={{ color: "#2c6e49", textAlign: "center" }}>Login</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 px-4">
+      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-md w-full transform transition hover:scale-[1.02]">
+        <h1 className="text-3xl font-extrabold text-center text-gray-900 mb-2">
+          Welcome Back 👋
+        </h1>
+        <p className="text-center text-gray-600 mb-6">
+          Sign in with your email to access the dashboard
+        </p>
 
-        {message && (
-          <p
-            style={{
-              backgroundColor: "#e0f7ff",
-              padding: 10,
-              borderRadius: 8,
-              color: "#0070f3",
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
-            {message}
-          </p>
-        )}
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={inputStyle}
+            className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
           />
-          <button onClick={handleLogin} style={buttonStyle}>
-            Send Login Link
+
+          <button
+            type="submit"
+            className="w-full py-3 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition duration-200"
+          >
+            Send Magic Link ✨
           </button>
+        </form>
+
+        {message && (
+          <p className="mt-4 text-center text-sm text-gray-700">{message}</p>
+        )}
+
+        <div className="mt-6 text-center text-xs text-gray-500">
+          By logging in you agree to our{" "}
+          <a href="/terms" className="text-indigo-600 hover:underline">
+            Terms
+          </a>{" "}
+          &{" "}
+          <a href="/privacy" className="text-indigo-600 hover:underline">
+            Privacy Policy
+          </a>
         </div>
-      </main>
-    </>
+      </div>
+    </div>
   );
 }
-
-const inputStyle = {
-  padding: 12,
-  borderRadius: 8,
-  border: "1px solid #ccc",
-  width: "100%",
-  boxSizing: "border-box",
-};
-
-const buttonStyle = {
-  padding: 12,
-  borderRadius: 8,
-  border: "none",
-  backgroundColor: "#0070f3",
-  color: "white",
-  fontWeight: "bold",
-  cursor: "pointer",
-};
