@@ -25,7 +25,7 @@ export default function Header() {
           <Link href="/prayer"><a style={linkStyle}>Prayer</a></Link>
           <Link href="/events"><a style={linkStyle}>Events</a></Link>
           <Link href="/give"><a style={linkStyle}>Give</a></Link>
-          <Link href="/login"><a style={linkStyle}>Login</a></Link>
+          <Link href="/admin/login"><a style={linkStyle}>Login</a></Link>
         </nav>
       </div>
 
